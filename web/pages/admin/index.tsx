@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Heading, SimpleGrid, Spinner, Text } from '@chakra-ui/react';
+import { GetServerSideProps } from 'next';
 import Layout from '../../components/Layout';
 
 type Log = { id: string; action: string; payload: any };
@@ -30,3 +31,25 @@ export default function AdminDashboard() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const cookie = ctx.req.headers.cookie;
+  const token = cookie
+    ?.split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith('token='))
+    ?.split('=')[1];
+  try {
+    const payload = token
+      ? JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+      : null;
+    if (!payload || payload.role !== 'admin') {
+      throw new Error('unauthorized');
+    }
+    return { props: {} };
+  } catch {
+    return {
+      redirect: { destination: '/admin/login', permanent: false },
+    };
+  }
+};
