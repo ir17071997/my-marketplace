@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminLog, AdminActionType } from './admin.entity';
+import { AdminGuard } from '../auth/admin.guard';
 
 class LogDto {
   action: AdminActionType;
   payload: any;
 }
 
+@UseGuards(AdminGuard)
 @Controller('admin/logs')
 export class AdminController {
   constructor(private svc: AdminService) {}
